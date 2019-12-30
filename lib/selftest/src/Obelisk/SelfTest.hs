@@ -164,16 +164,16 @@ main = do
         it "can build ghc.backend" $ inTmpObInit $ \_ -> nixBuild ["-A", "ghc.backend"]
         it "can build ghcjs.frontend" $ inTmpObInit $ \_ -> nixBuild ["-A", "ghcjs.frontend"]
 
-        if System.Info.os == "darwin"
-          then it "can build ios" $ inTmpObInit $ \_ -> nixBuild ["-A", "ios.frontend"]
-          else it "can build android after accepting license" $ inTmpObInit $ \dir -> do
-            let defaultNixPath = dir </> ("default.nix" :: Shelly.FilePath)
-            writefile defaultNixPath
-              =<< T.replace
-                "# config.android_sdk.accept_license = false;"
-                "config.android_sdk.accept_license = true;"
-              <$> readfile defaultNixPath
-            nixBuild ["-A", "android.frontend"]
+        -- if System.Info.os == "darwin"
+        --   then it "can build ios" $ inTmpObInit $ \_ -> nixBuild ["-A", "ios.frontend"]
+        --   else it "can build android after accepting license" $ inTmpObInit $ \dir -> do
+        --     let defaultNixPath = dir </> ("default.nix" :: Shelly.FilePath)
+        --     writefile defaultNixPath
+        --       =<< T.replace
+        --         "# config.android_sdk.accept_license = false;"
+        --         "config.android_sdk.accept_license = true;"
+        --       <$> readfile defaultNixPath
+        --     nixBuild ["-A", "android.frontend"]
 
         forM_ ["ghc", "ghcjs"] $ \compiler -> do
           let
@@ -183,6 +183,7 @@ main = do
           it ("can build in " <> shellName) $ inTmpObInit $ \_ -> inShell $ "cabal new-build --" <> fromString compiler <> " all"
 
         it "has idempotent thunk update" $ inTmpObInit $ \_ -> do
+          _  <- pack
           u  <- update
           uu <- update
           assertRevEQ u uu
@@ -190,6 +191,7 @@ main = do
       describe "ob thunk pack/unpack" $ parallel $ do
         it "has thunk pack and unpack inverses" $ inTmpObInit $ \_ -> do
 
+          _    <- pack
           e    <- commitAll
           eu   <- unpack
           eup  <- pack
@@ -227,7 +229,6 @@ main = do
             testThunkPack $ fromText repo
 
         it "aborts thunk pack when there are uncommitted files" $ inTmpObInit $ \dir -> do
-          void unpack
           testThunkPack (dir </> thunk)
 
       describe "ob thunk update --branch" $ parallel $ do
