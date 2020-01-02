@@ -121,7 +121,7 @@ in rec {
   shell = pinBuildInputs "obelisk-shell" ([command] ++ commandRuntimeDeps pkgs);
 
   selftest = pkgs.writeScript "selftest" ''
-    #!${pkgs.bash}/bin/bash
+    #!${pkgs.stdenv.shell}
     set -euo pipefail
 
     PATH="${command}/bin:$PATH"
