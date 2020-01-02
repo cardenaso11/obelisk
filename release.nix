@@ -8,6 +8,7 @@
 let
   inherit (local-self.nixpkgs) lib runCommand nix;
 
+  pkgs = import ./dep/nixpkgs-19.09/default.nix {};
   cacheBuildSystems = [ "x86_64-linux" "x86_64-darwin" ];
 
   obeliskPackagesCommon = [
@@ -65,7 +66,11 @@ let
       (lib.optional reflex-platform.iosSupport iosSkeleton)
       [ command serverSkeletonExe serverSkeletonShell ]
     ];
-    command = obelisk.command;
+    command = pkgs.lib.overrideDerivation obelisk.command( attrs: {
+       checkPhase = ''
+         ${obelisk.selftest}
+       '';
+    });
     skeleton = import ./skeleton { inherit obelisk; };
     serverSkeletonExe = skeleton.exe;
     # TODO fix nixpkgs so it doesn't try to run the result of haskell shells as setup hooks.

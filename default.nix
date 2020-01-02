@@ -121,12 +121,13 @@ in rec {
   shell = pinBuildInputs "obelisk-shell" ([command] ++ commandRuntimeDeps pkgs);
 
   selftest = pkgs.writeScript "selftest" ''
-    #!/usr/bin/env bash
+    #!${pkgs.bash}/bin/bash
     set -euo pipefail
 
     PATH="${command}/bin:$PATH"
     export OBELISK_IMPL="$(mktemp -d)"
-    git clone file://${pathGit} $OBELISK_IMPL
+    # This uses the nix store path for an obelisk git checkout as the remote.
+    ${pkgs.git}/bin/git clone file://${pathGit} $OBELISK_IMPL
     "${ghcObelisk.obelisk-selftest}/bin/obelisk-selftest" +RTS -N -RTS "$@"
   '';
   skeleton = pkgs.runCommand "skeleton" {
