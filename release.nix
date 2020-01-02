@@ -68,7 +68,7 @@ let
     ];
     command = pkgs.lib.overrideDerivation obelisk.command( attrs: {
        checkPhase = ''
-         ${obelisk.selftest}
+         ${obelisk.selftest} -v
        '';
     });
     skeleton = import ./skeleton { inherit obelisk; };
